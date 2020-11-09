@@ -1,12 +1,12 @@
 package tech.viacomcbs.sheldonbirthday;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 class SheldonBirthdayControllerTest {
 
@@ -23,6 +23,22 @@ class SheldonBirthdayControllerTest {
         assertThat(birthday).isEqualTo("FakeResult2{fakeResult1=FakeResult1{startResult=''}}");
     }
 
+    @Test
+    @DisplayName("brakes on cycles")
+    void brakesOnCycles() {
+        // given
+        SheldonBirthdayController sheldonBirthdayController = new SheldonBirthdayController(List.of(new FakeTask1(), new FakeTask3()));
+
+        // when
+        Throwable throwable = catchThrowable(() -> sheldonBirthdayController.birthday());
+
+        // then
+        assertThat(throwable)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Birthday tasks has cycle [class java.lang.String, "
+                                  + "class tech.viacomcbs.sheldonbirthday.SheldonBirthdayControllerTest$FakeResult1]");
+    }
+
     static class FakeTask1 implements BirthdayTask<String, FakeResult1> {
 
         @Override
@@ -35,6 +51,13 @@ class SheldonBirthdayControllerTest {
         @Override
         public FakeResult2 perform(FakeResult1 source) {
             return new FakeResult2(source);
+        }
+    }
+
+    static class FakeTask3 implements BirthdayTask<FakeResult1, String> {
+        @Override
+        public String perform(FakeResult1 source) {
+            return source.toString();
         }
     }
 

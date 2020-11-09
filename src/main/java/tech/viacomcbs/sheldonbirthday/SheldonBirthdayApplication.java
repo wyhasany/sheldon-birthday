@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,16 @@ class SheldonBirthdayController {
 	@ResponseBody
 	String birthday() {
 		Object chainObject = "";
+		List<Class<?>> cycleRecorder = new ArrayList<>();
+		cycleRecorder.add(chainObject.getClass());
 		while (birthdayTaskMap.get(chainObject.getClass()) != null) {
 			BirthdayTask birthdayTask = birthdayTaskMap.get(chainObject.getClass());
 			chainObject = birthdayTask.perform(chainObject);
+			if (cycleRecorder.contains(chainObject.getClass())) {
+				throw new IllegalStateException("Birthday tasks has cycle " + cycleRecorder.toString());
+			} else {
+				cycleRecorder.add(chainObject.getClass());
+			}
 		}
 		return chainObject.toString();
 	}
