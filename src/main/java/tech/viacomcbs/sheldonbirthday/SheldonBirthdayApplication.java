@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.List;
 
 @SpringBootApplication
@@ -24,7 +25,7 @@ class SheldonBirthdayController {
 	private final List<BirthdayTask> birthdayTasks;
 
 	SheldonBirthdayController(List<BirthdayTask> birthdayTasks) {
-		// Collections.sort(birthdayTasks);
+		Collections.sort(birthdayTasks);
 		this.birthdayTasks = birthdayTasks;
 	}
 
