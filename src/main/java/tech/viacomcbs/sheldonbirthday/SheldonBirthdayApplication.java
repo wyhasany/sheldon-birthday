@@ -1,10 +1,14 @@
 package tech.viacomcbs.sheldonbirthday;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @SpringBootApplication
 public class SheldonBirthdayApplication {
@@ -16,35 +20,74 @@ public class SheldonBirthdayApplication {
 }
 
 @Controller
+@RequiredArgsConstructor
 class SheldonBirthdayController {
+
+	private final List<BirthdayTask> birthdayTasks;
 
 	@GetMapping(value = "/birthday", produces = "text/plain")
 	@ResponseBody
 	String birthday() {
 		String start = "";
-		// rajesh
-		start +=
-   			"""
-			*               0   0               *
-			                |   |
-			""";
-		// bernardet
-		start +=
+		for (BirthdayTask birthdayTask : birthdayTasks) {
+			start = birthdayTask.perform(start);
+		}
+		return start;
+	}
+}
+
+interface BirthdayTask {
+	String perform(String source);
+}
+
+@Component
+class Rajesh implements BirthdayTask {
+
+	@Override
+	public String perform(String source) {
+		return source +=
+			"""
+         *               0   0               *
+                         |   |
+         """;
+	}
+}
+
+@Component
+class Bernardette implements BirthdayTask {
+
+	@Override
+	public String perform(String source) {
+		return source +=
 			"""
 			            ____|___|____
 			         0  |~ ~ ~ ~ ~ ~|   0
 			         |  |           |   |
 			""";
-		// howard
-		start +=
+	}
+}
+
+@Component
+class Howard implements BirthdayTask {
+
+	@Override
+	public String perform(String source) {
+		return source +=
 			"""
 			      ___|__|___________|___|__
 			      |/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|
 			  0   |       H a p p y       |   0
 			  |   |/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|   |
 			""";
-		// leonard
-		start +=
+	}
+}
+
+@Component
+class Leonard implements BirthdayTask {
+
+	@Override
+	public String perform(String source) {
+		return source +=
 			"""
 			 _|___|_______________________|___|__
 			|/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|
@@ -52,15 +95,20 @@ class SheldonBirthdayController {
 			|         B i r t h d a y! ! !      |
 			| ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ |
 			""";
-		// penny
-		start +=
+	}
+}
+
+@Component
+class Penny implements BirthdayTask {
+
+	@Override
+	public String perform(String source) {
+		return source +=
 			"""
 			|___________________________________|
 			|                                   |
 			|             Sheldon  ! ! !        |
 			|___________________________________|
 			""";
-		return start;
 	}
-
 }
