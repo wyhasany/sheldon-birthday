@@ -1,5 +1,6 @@
 package tech.viacomcbs.sheldonbirthday;
 
+import lombok.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
@@ -7,8 +8,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Collections;
+import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 public class SheldonBirthdayApplication {
@@ -22,130 +25,141 @@ public class SheldonBirthdayApplication {
 @Controller
 class SheldonBirthdayController {
 
-	private final List<BirthdayTask> birthdayTasks;
+	private final Map<Class<?>, BirthdayTask<?,?>> birthdayTaskMap;
 
-	SheldonBirthdayController(List<BirthdayTask> birthdayTasks) {
-		Collections.sort(birthdayTasks);
-		this.birthdayTasks = birthdayTasks;
+	SheldonBirthdayController(List<BirthdayTask<?, ?>> birthdayTasks) {
+		birthdayTaskMap = new HashMap<>();
+		for (BirthdayTask<?,?> birthdayTask : birthdayTasks) {
+			birthdayTaskMap.put(birthdayTask.handles(), birthdayTask);
+		}
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@GetMapping(value = "/birthday", produces = "text/plain")
 	@ResponseBody
 	String birthday() {
-		String start = "";
-		for (BirthdayTask birthdayTask : birthdayTasks) {
-			start = birthdayTask.perform(start);
+		Object chainObject = "";
+		while (birthdayTaskMap.get(chainObject.getClass()) != null) {
+			BirthdayTask birthdayTask = birthdayTaskMap.get(chainObject.getClass());
+			chainObject = birthdayTask.perform(chainObject);
 		}
-		return start;
+		return chainObject.toString();
 	}
 }
 
-interface BirthdayTask extends Comparable<BirthdayTask> {
-	String perform(String source);
+interface BirthdayTask<T, U> {
+	U perform(T source);
 
-	int getOrder();
-
-	@Override
-	default int compareTo(BirthdayTask o) {
-		return getOrder() - o.getOrder();
+	default Class<T> handles() {
+		return (Class<T>)(((ParameterizedType) this.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
 	}
 }
 
 @Component
-class Rajesh implements BirthdayTask {
+class Rajesh implements BirthdayTask<String, RajeshResult> {
 
 	@Override
-	public String perform(String source) {
-		return source +=
+	public RajeshResult perform(String source) {
+		return new RajeshResult(source +=
 			"""
          *               0   0               *
                          |   |
-         """;
-	}
-
-	@Override
-	public int getOrder() {
-		return 1;
+         """);
 	}
 }
 
 @Component
-class Bernardette implements BirthdayTask {
+class Bernardette implements BirthdayTask<RajeshResult, BernardetteResult> {
 
 	@Override
-	public String perform(String source) {
-		return source +=
+	public BernardetteResult perform(RajeshResult source) {
+		String result = source.getResult();
+		return new BernardetteResult(result +=
 			"""
 			            ____|___|____
 			         0  |~ ~ ~ ~ ~ ~|   0
 			         |  |           |   |
-			""";
-	}
-
-	@Override
-	public int getOrder() {
-		return 2;
+			""");
 	}
 }
 
 @Component
-class Howard implements BirthdayTask {
+class Howard implements BirthdayTask<BernardetteResult, HowardResult> {
 
 	@Override
-	public String perform(String source) {
-		return source +=
+	public HowardResult perform(BernardetteResult source) {
+		String result = source.getResult();
+		return new HowardResult(result +=
 			"""
 			      ___|__|___________|___|__
 			      |/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|
 			  0   |       H a p p y       |   0
 			  |   |/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|   |
-			""";
-	}
+			""");
 
-	@Override
-	public int getOrder() {
-		return 3;
 	}
 }
 
 @Component
-class Leonard implements BirthdayTask {
+class Leonard implements BirthdayTask<HowardResult, LeonardResult> {
 
 	@Override
-	public String perform(String source) {
-		return source +=
+	public LeonardResult perform(HowardResult source) {
+		String result = source.getResult();
+		return new LeonardResult(result +=
 			"""
 			 _|___|_______________________|___|__
 			|/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|
 			|                                   |
 			|         B i r t h d a y! ! !      |
 			| ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ |
-			""";
-	}
-
-	@Override
-	public int getOrder() {
-		return 4;
+			""");
 	}
 }
 
 @Component
-class Penny implements BirthdayTask {
+class Penny implements BirthdayTask<LeonardResult, PennyResult> {
 
 	@Override
-	public String perform(String source) {
-		return source +=
+	public PennyResult perform(LeonardResult source) {
+		String result = source.getResult();
+		return new PennyResult(result +=
 			"""
 			|___________________________________|
 			|                                   |
 			|             Sheldon  ! ! !        |
 			|___________________________________|
-			""";
+			""");
 	}
+}
 
+
+@Value
+class RajeshResult {
+	String result;
+}
+
+@Value
+class BernardetteResult {
+	String result;
+}
+
+@Value
+class HowardResult {
+	String result;
+}
+
+@Value
+class LeonardResult {
+	String result;
+}
+
+@Value
+class PennyResult {
+	String result;
 
 	@Override
-	public int getOrder() {
-		return 5;
+	public String toString() {
+		return result;
 	}
 }
