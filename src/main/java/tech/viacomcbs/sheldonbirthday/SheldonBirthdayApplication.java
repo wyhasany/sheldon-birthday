@@ -3,6 +3,7 @@ package tech.viacomcbs.sheldonbirthday;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +42,7 @@ interface BirthdayTask {
 }
 
 @Component
+@Order(1)
 class Rajesh implements BirthdayTask {
 
 	@Override
@@ -54,6 +56,7 @@ class Rajesh implements BirthdayTask {
 }
 
 @Component
+@Order(2)
 class Bernardette implements BirthdayTask {
 
 	@Override
@@ -68,6 +71,7 @@ class Bernardette implements BirthdayTask {
 }
 
 @Component
+@Order(3)
 class Howard implements BirthdayTask {
 
 	@Override
@@ -83,6 +87,7 @@ class Howard implements BirthdayTask {
 }
 
 @Component
+@Order(3)
 class Leonard implements BirthdayTask {
 
 	@Override
@@ -99,6 +104,7 @@ class Leonard implements BirthdayTask {
 }
 
 @Component
+@Order(4)
 class Penny implements BirthdayTask {
 
 	@Override
