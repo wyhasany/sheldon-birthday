@@ -1,9 +1,7 @@
 package tech.viacomcbs.sheldonbirthday;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +19,14 @@ public class SheldonBirthdayApplication {
 }
 
 @Controller
-@RequiredArgsConstructor
 class SheldonBirthdayController {
 
 	private final List<BirthdayTask> birthdayTasks;
+
+	SheldonBirthdayController(List<BirthdayTask> birthdayTasks) {
+		// Collections.sort(birthdayTasks);
+		this.birthdayTasks = birthdayTasks;
+	}
 
 	@GetMapping(value = "/birthday", produces = "text/plain")
 	@ResponseBody
@@ -37,12 +39,18 @@ class SheldonBirthdayController {
 	}
 }
 
-interface BirthdayTask {
+interface BirthdayTask extends Comparable<BirthdayTask> {
 	String perform(String source);
+
+	int getOrder();
+
+	@Override
+	default int compareTo(BirthdayTask o) {
+		return getOrder() - o.getOrder();
+	}
 }
 
 @Component
-@Order(1)
 class Rajesh implements BirthdayTask {
 
 	@Override
@@ -53,10 +61,14 @@ class Rajesh implements BirthdayTask {
                          |   |
          """;
 	}
+
+	@Override
+	public int getOrder() {
+		return 1;
+	}
 }
 
 @Component
-@Order(2)
 class Bernardette implements BirthdayTask {
 
 	@Override
@@ -68,10 +80,14 @@ class Bernardette implements BirthdayTask {
 			         |  |           |   |
 			""";
 	}
+
+	@Override
+	public int getOrder() {
+		return 2;
+	}
 }
 
 @Component
-@Order(3)
 class Howard implements BirthdayTask {
 
 	@Override
@@ -84,10 +100,14 @@ class Howard implements BirthdayTask {
 			  |   |/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/|   |
 			""";
 	}
+
+	@Override
+	public int getOrder() {
+		return 3;
+	}
 }
 
 @Component
-@Order(3)
 class Leonard implements BirthdayTask {
 
 	@Override
@@ -101,10 +121,14 @@ class Leonard implements BirthdayTask {
 			| ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ |
 			""";
 	}
+
+	@Override
+	public int getOrder() {
+		return 4;
+	}
 }
 
 @Component
-@Order(4)
 class Penny implements BirthdayTask {
 
 	@Override
@@ -116,5 +140,11 @@ class Penny implements BirthdayTask {
 			|             Sheldon  ! ! !        |
 			|___________________________________|
 			""";
+	}
+
+
+	@Override
+	public int getOrder() {
+		return 5;
 	}
 }
