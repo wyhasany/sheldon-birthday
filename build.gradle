@@ -14,6 +14,14 @@ configurations {
 	}
 }
 
+tasks.withType(JavaCompile) {
+	options.compilerArgs += '--enable-preview'
+}
+
+tasks.withType(Test) {
+	jvmArgs += "--enable-preview"
+}
+
 repositories {
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
