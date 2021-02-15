@@ -3,12 +3,12 @@ package tech.viacomcbs.sheldonbirthday;
 import lombok.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,8 +58,9 @@ class SheldonBirthdayController {
 interface BirthdayTask<T, U> {
 	U perform(T source);
 
+	@SuppressWarnings("unchecked")
 	default Class<T> handles() {
-		return (Class<T>)(((ParameterizedType) this.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+		return (Class<T>) ResolvableType.forInstance(this).getInterfaces()[0].getGeneric(1).resolve();
 	}
 }
 
